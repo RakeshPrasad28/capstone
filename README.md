@@ -21,7 +21,7 @@ The system is decoupled into modular layers:
    - Manages step traversals, variable interpolation, context accumulation, and branch evaluation (`trueBranch` vs `falseBranch`).
    - Executes automatic retries with exponential backoff on transient step failures.
 5. **Node Registry (Pluggable Connectors)**: Modular registry allowing custom node executors to be added without modifying core engine logic.
-6. **Persistence Layer**: Prisma ORM with SQLite (relational models with JSON storage for configs and runtime contexts).
+6. **Persistence Layer**: Prisma ORM with SQLite (relational models with JSON storage for configs and runtime contexts)
 
 ```
                       +---------------------------------------+
