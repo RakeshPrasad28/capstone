@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  name      String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  workflows Workflow[]
+}
+
+model Workflow {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  status        String        @default("DRAFT")
+  triggerType   String        @default("MANUAL")
+  triggerConfig String        @default("{}")
+  nodes         String        @default("[]")
+  version       Int           @default(1)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  runs          WorkflowRun[]
+}
+
+model WorkflowRun {
+  id             String    @id @default(uuid())
+  workflowId     String
+  workflow       Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status         String    @default("PENDING")
+  triggerSource  String    @default("MANUAL")
+  triggerPayload String?   @default("{}")
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  durationMs     Int?
+  error          String?
+  stepLogs       StepLog[]
+}
+
+model StepLog {
+  id           String      @id @default(uuid())
+  runId        String
+  run          WorkflowRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  nodeId       String
+  nodeType     String
+  nodeName     String
+  status       String
+  inputData    String?
+  outputData   String?
+  errorMessage String?
+  retryCount   Int         @default(0)
+  startedAt    DateTime    @default(now())
+  durationMs   Int?
+}
