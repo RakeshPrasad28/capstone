@@ -1,8 +1,13 @@
-# Flow: Distributed Workflow Orchestrator
-
-Flow is a distributed workflow orchestration engine designed to automate tasks across services, APIs, and business systems (similar to Make or n8n). It allows users to define directed workflows, execute them sequentially or conditionally via branching, handle errors and retries gracefully, and trigger them via webhooks or cron schedules.
+# Flow: Distributed Workflow Automation Engine
+**Airtribe Backend Engineering Launchpad — Capstone Project**  
+**Author:** Rakesh Prasad  
+**Repository:** [github.com/rakeshprasad/flow-workflow-engine](https://github.com/rakeshprasad/flow-workflow-engine)  
 
 ---
+
+## Project Summary
+This project is my capstone submission for the Airtribe Backend Engineering Launchpad. The goal was to build a distributed workflow orchestration backend (similar to Make or n8n) in Node.js that enables users to design, execute, monitor, and recover multi-step workflows connecting external services and APIs.
+
 
 ## Architecture Overview (HLD)
 
@@ -398,3 +403,26 @@ The test suite executes the full end-to-end lifecycle:
 - Triggers webhook with secret validation
 - Verifies run history and step logs
 - Pauses, guards, resumes, and reschedules the workflow
+
+---
+
+## Engineering Design Decisions & Trade-offs
+
+1. **Why SQLite via Prisma instead of MongoDB or direct Postgres?**
+   - Workflows have strict relational hierarchies (Users -> Workflows -> Runs -> StepLogs), but the individual node configs and step outputs vary dynamically.
+   - Prisma ORM allowed strong typing and foreign-key referential integrity while letting us store arbitrary node configurations as serialized JSON.
+   - Using SQLite means any reviewer or peer can clone the repository, run `npm install && npm test`, and have it pass immediately without having to configure local Docker containers or Postgres credentials. If we need to deploy to production, changing `provider = "sqlite"` to `"postgresql"` in `prisma/schema.prisma` takes 1 minute.
+
+2. **Why Freeze `PUBLISHED` Workflows?**
+   - A common pitfall in orchestrators is mutating node definitions while an asynchronous run or webhook is mid-flight. Freezing published workflows prevents race conditions and ensures execution idempotency. To make edits, the workflow must be transitioned back to `DRAFT`.
+
+3. **Pluggable Node Registry Pattern:**
+   - Rather than using an anti-pattern like a monolithic `switch (type)` statement inside the execution loop, each node type (`HTTP_REQUEST`, `CONDITION`, `DELAY`, `NOTIFY`) is encapsulated in its own class extending `BaseNode` and registered in `NodeRegistry`. Adding a new connector (e.g., SendGrid, MySQL, or OpenAI) only requires creating one file and registering it.
+
+4. **Retry Strategy & Backoff:**
+   - Transient network issues or rate limits are common with external HTTP nodes. The exponential backoff formula (`1s -> 2s -> 4s`) gives external services recovery time without overloading them.
+
+5. **Future Roadmap:**
+   - Moving from in-process asynchronous execution (`setImmediate`) to a dedicated persistent worker queue (like BullMQ / Redis) for distributed multi-server scale.
+   - Visual drag-and-drop React flow builder frontend.
+

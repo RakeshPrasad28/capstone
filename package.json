@@ -1,16 +1,22 @@
 {
-  "name": "capstone",
+  "name": "flow-workflow-orchestrator",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Flow - Distributed Workflow Automation Platform (Airtribe Backend Capstone)",
+  "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "prisma:generate": "prisma generate",
     "test": "node tests/test-flow.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "workflow-engine",
+    "orchestrator",
+    "automation",
+    "airtribe",
+    "capstone"
+  ],
+  "author": "Rakesh Prasad",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "5.22.0",
